@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Expense Tracker</title>
+
+<style>
+
+body{
+font-family: Arial;
+background: linear-gradient(120deg,#89f7fe,#66a6ff);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:15px;
+width:350px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+h2{
+text-align:center;
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid gray;
+}
+
+button{
+width:100%;
+padding:10px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:8px;
+margin-top:10px;
+cursor:pointer;
+}
+
+button:hover{
+background:#45a049;
+}
+
+.expense{
+display:flex;
+justify-content:space-between;
+background:#f1f1f1;
+padding:8px;
+margin-top:8px;
+border-radius:8px;
+}
+
+.delete{
+background:red;
+color:white;
+border:none;
+border-radius:5px;
+padding:3px 6px;
+cursor:pointer;
+}
+
+.total{
+margin-top:10px;
+font-weight:bold;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h2>💰 Expense Tracker</h2>
+
+<input id="title" placeholder="Expense title">
+
+<input id="amount" type="number" placeholder="Amount">
+
+<select id="category">
+<option>Food</option>
+<option>Travel</option>
+<option>Shopping</option>
+<option>Other</option>
+</select>
+
+<button onclick="addExpense()">Add Expense</button>
+
+<div id="list"></div>
+
+<div class="total" id="total"></div>
+
+</div>
+
+
+<script>
+
+const API="http://localhost:5000"
+
+async function loadExpenses(){
+
+let res=await fetch(API+"/expenses")
+
+let data=await res.json()
+
+let total=0
+
+list.innerHTML=data.map(e=>{
+
+total+=e.amount
+
+return `
+<div class="expense">
+
+<span>${e.title} - ₹${e.amount}</span>
+
+<button class="delete"
+onclick="deleteExpense('${e.id}')">X</button>
+
+</div>
+`
+
+}).join("")
+
+total.innerHTML="Total: ₹"+total
+
+}
+
+async function addExpense(){
+
+let expense={
+
+title:title.value,
+
+amount:Number(amount.value),
+
+category:category.value,
+
+date:new Date()
+
+}
+
+await fetch(API+"/expenses",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify(expense)
+
+})
+
+loadExpenses()
+
+}
+
+async function deleteExpense(id){
+
+await fetch(API+"/expenses/"+id,{method:"DELETE"})
+
+loadExpenses()
+
+}
+
+loadExpenses()
+
+</script>
+
+
+</body>
+</html>
